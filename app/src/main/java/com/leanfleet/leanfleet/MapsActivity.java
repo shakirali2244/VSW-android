@@ -20,17 +20,25 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
+import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.w3c.dom.Document;
 
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,6 +55,7 @@ public class MapsActivity extends FragmentActivity {
     public static LatLng loc = null;
     public static LatLng me = null;
     public static String id = "-1";
+    String json = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,16 +75,45 @@ public class MapsActivity extends FragmentActivity {
                 JSONObject data = (JSONObject) args[0];
                 try {
                     //loc = new LatLng(data.getDouble("lat"), data.getDouble("lng"));
-                    String url = "https://maps.googleapis.com/maps/api/geocode/json?address="+data.getString("endingPoint");
+                    String url = "https://maps.googleapis.com/maps/api/geocode/json?address="+
+                            URLEncoder.encode(data.getString("endingpoint"), "UTF-8");
                     URL url2 = new URL(url);
                     HttpURLConnection conn = (HttpURLConnection) url2.openConnection();
                     conn.setRequestMethod("GET");
-                    Log.d("LATLONG",)
+                    InputStream in = new BufferedInputStream(conn.getInputStream());
+                    try {
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(in,"utf-8"),8);
+                        StringBuilder sbuild = new StringBuilder();
+                        String line = null;
+                        while ((line = reader.readLine()) != null) {
+                            sbuild.append(line);
+                        }
+                        in.close();
+                        json = sbuild.toString();
+                    } catch(Exception e) {
+                    }
+
+
+                    //now parse
+                    JSONParser parser = new JSONParser();
+                    Object obj = parser.parse(json);
+                    org.json.simple.JSONObject jb = (org.json.simple.JSONObject) obj;
+
+                    //now read
+                    org.json.simple.JSONArray jsonObject1 = (org.json.simple.JSONArray) jb.get("results");
+                    org.json.simple.JSONObject jsonObject2 = (org.json.simple.JSONObject)jsonObject1.get(0);
+                    org.json.simple.JSONObject jsonObject3 = (org.json.simple.JSONObject)jsonObject2.get("geometry");
+                    org.json.simple.JSONObject location = (org.json.simple.JSONObject) jsonObject3.get("location");
+
+                    loc = new LatLng ((double)location.get("lat"),(double)location.get("lng"));
+                    //Log.d("LATLONG",response);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 } catch (MalformedURLException e) {
                     e.printStackTrace();
                 } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (ParseException e) {
                     e.printStackTrace();
                 }
 

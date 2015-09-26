@@ -26,4 +26,5 @@ dependencies {
     compile 'io.socket:socket.io-client:0.6.1'
     compile 'org.json:json:20090211'
     compile files('src/main/java/com/leanfleet/leanfleet/commons-io-2.4.jar')
+    compile files('src/main/java/com/leanfleet/leanfleet/json-simple-1.1.1.jar')
 }
