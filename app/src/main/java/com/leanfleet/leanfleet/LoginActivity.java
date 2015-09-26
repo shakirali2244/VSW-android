@@ -14,6 +14,7 @@ import android.os.AsyncTask;
 
 import android.os.Build;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
 import android.util.Log;
@@ -80,6 +81,8 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                 attemptLogin();
             }
         });
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
     }
 
         /*mLoginFormView = findViewById(R.id.login_form);
@@ -97,7 +100,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
      * errors are presented and no actual login attempt is made.
      */
     public void attemptLogin() {
-        Intent intent = new Intent(this, DashActivity.class);
+        Intent intent = new Intent(this, MapsActivity.class);
         String id = mDriverIdView.getText().toString();
         //Log.d("SA :",id);
         intent.putExtra("DRIVER_ID", id);
